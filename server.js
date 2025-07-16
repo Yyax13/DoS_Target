@@ -6,10 +6,11 @@ app.use(cors());
 
 app.use((req, res) => {
     const ipFromHeader = req.headers['x-forwarded-for'];
-    let ip = ipFromHeader ? ipFromHeader.split(',')[0].trim() : req.connection.remoteAddress;
-    if (ip == '::1') ip = '0.0.0.0';
+    let ip = req.connection.remoteAddress || req.socket.remoteAddress;
+    ip = ip.replace('::ffff:', '');
+    if (ip == '::1' || ip == '127.0.0.1') ip = '0.0.0.0';
 
-    console.log(`[${req.method}] | ${ip}`);
+    console.log(`[${new Date().toISOString()}] - [${req.method}] | X-Fowarded-For: ${ipFromHeader ? ipFromHeader : null} | IP: ${ip}`);
     res.status(200).json({
         method: req.method,
         ip: ip, message: 'Hello',
